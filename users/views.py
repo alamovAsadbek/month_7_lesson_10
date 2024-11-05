@@ -53,3 +53,19 @@ class VerifyEmailView(APIView):
 
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             return Response({"message": "Invalid token or user."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResendEmailVerificationView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({"message": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(email=email)
+            if user.is_active:
+                return Response({"message": "Account is already active."}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                user.send_activation_email()
+                return Response({"message": "Email verification link sent to your email."}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({"message": "User does not exist."}, status=status.HTTP_400_BAD_REQUEST)
