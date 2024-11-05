@@ -47,7 +47,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             [user.email],
             fail_silently=False,
         ), ).start()
-
         return user
 
 
