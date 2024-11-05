@@ -7,7 +7,9 @@ from .serializers import TweetSerializer
 
 class TweetView(generics.GenericAPIView):
     serializer_class = TweetSerializer
-    queryset = TweetModel.objects.all()
+
+    def get_queryset(self):
+        return TweetModel.objects.filter(user=self.request.user)
 
     def get(self, request):
         tweets = self.get_queryset()
