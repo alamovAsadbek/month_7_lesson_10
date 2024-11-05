@@ -83,10 +83,10 @@ class UserView(generics.GenericAPIView):
     serializer_class = RegisterSerializer
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated]
+    pagination_class = UserPaginationView
 
     def get(self, request, *args, **kwargs):
         user = self.request.user
-        paginator = Pagination()
         serializer = self.get_serializer(user)
         return Response(serializer.data)
 
