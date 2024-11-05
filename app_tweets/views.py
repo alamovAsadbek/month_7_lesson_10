@@ -47,3 +47,12 @@ class TweetView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class AllTweetView(generics.ListAPIView):
+    serializer_class = TweetSerializer
+    queryset = TweetModel.objects.all()
+    pagination_class = TweetPaginationView
+
+    def get_queryset(self):
+        return TweetModel.objects.all()
