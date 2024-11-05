@@ -27,19 +27,16 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('confirm_password')
 
-        # Foydalanuvchini yaratish
         user = User.objects.create_user(
             username=validated_data['username'],
             password=validated_data['password'],
             email=validated_data['email'],
-            is_active=False,  # Foydalanuvchi faollashtirilmasin
+            is_active=False,
         )
 
-        # Token va UID yaratish
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
 
-        # Tasdiqlash havolasini yaratish
         current_site = get_current_site(self.context['request'])
         email_subject = 'Activate your account'
         message = render_to_string('verify_email.html', {
@@ -49,17 +46,15 @@ class RegisterSerializer(serializers.ModelSerializer):
             'token': token,
         })
 
-        # Emailni asinxron yuborish uchun Threadda yuborish
         def send_email():
             send_mail(
                 email_subject,
                 message,
-                'alamovasad@gmail.com',  # Email manzilingiz
+                'alamovasad@gmail.com',
                 [user.email],
                 fail_silently=False,
             )
 
-        # Email yuborishni alohida threadda boshlaymiz
         threading.Thread(target=send_email).start()
 
         return user
