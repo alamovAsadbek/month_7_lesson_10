@@ -24,6 +24,13 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Passwords do not match")
         return data
 
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email already exists")
+        elif not value.endswith('@gmail.com'):
+            raise serializers.ValidationError("Email must be a gmail account")
+        return value
+
     def create(self, validated_data):
         validated_data.pop('confirm_password')
 
