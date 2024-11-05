@@ -1,8 +1,9 @@
-import threading
-
 from django.contrib.auth.models import User
-from rest_framework import generics
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode
+from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import RegisterSerializer, LoginSerializer
@@ -36,12 +37,19 @@ class LogoutView(generics.GenericAPIView):
             return Response(status=400)
 
 
-class VerifyEmailView(generics.GenericAPIView):
-    def get(self, request, *args, **kwargs):
+class VerifyEmailView(APIView):
+
+    def get(self, request, uidb64, token):
         try:
-            email = request.query_params["email"]
-            send_verification_email = request.query_params["send_verification_email"]
-            threading.Thread(target=send_verification_email, args=(email,)).start()
-        except Exception as e:
-            print(e)
-            return Response(status=400)
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+
+            if default_token_generator.check_token(user, token):
+                user.is_active = True
+                user.save()
+                return Response({"message": "Account successfully activated!"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return Response({"message": "Invalid token or user."}, status=status.HTTP_400_BAD_REQUEST)
