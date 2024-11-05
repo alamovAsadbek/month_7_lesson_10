@@ -78,8 +78,6 @@ class LoginSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         user = authenticate(username=attrs['username'], password=attrs['password'])
         if user is None:
-            user = authenticate(email=attrs['email'], password=attrs['password'])
-            if user is None:
-                raise serializers.ValidationError("Invalid credentials")
+            raise serializers.ValidationError("Invalid credentials")
         attrs['user'] = user
         return attrs
