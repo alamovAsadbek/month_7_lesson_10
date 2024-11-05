@@ -35,7 +35,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         current_site = get_current_site(self.context['request'])
         email_subject = 'Activate your account'
-        email_body = f'Hi {user.username},\nPlease use the link below to activate your account:\n{current_site.domain}/verify-email/{uid}/{token}'
         message = render_to_string('verify_email.html', {'user': user,
                                                          'domain': current_site.domain,
                                                          'uid': uid,
