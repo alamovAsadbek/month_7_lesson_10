@@ -1,3 +1,5 @@
+import threading
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
@@ -38,11 +40,13 @@ class RegisterSerializer(serializers.ModelSerializer):
                                                          'domain': current_site.domain,
                                                          'uid': uid,
                                                          'token': token, })
-        send_mail(
+        threading.Thread(target=send_mail(
             email_subject,
             message,
-            
-        )
+            'alamovasad@gmail.com',
+            [user.email],
+            fail_silently=False,
+        ), ).start()
 
         return user
 
