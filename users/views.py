@@ -20,3 +20,14 @@ class LoginView(generics.CreateAPIView):
         user = serializer.validated_data['user']
         refresh = RefreshToken.for_user(user)
         return Response({'refresh': str(refresh), 'access': str(refresh.access_token)})
+
+
+class LogoutView(generics.GenericAPIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=205)
+        except Exception as e:
+            return Response(status=400)
