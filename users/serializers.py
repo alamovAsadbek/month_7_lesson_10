@@ -2,6 +2,8 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from rest_framework import serializers
@@ -32,10 +34,16 @@ class RegisterSerializer(serializers.ModelSerializer):
         current_site = get_current_site(self.context['request'])
         email_subject = 'Activate your account'
         email_body = f'Hi {user.username},\nPlease use the link below to activate your account:\n{current_site.domain}/verify-email/{uid}/{token}'
-        user.email_user(email_subject, email_body)
+        message = render_to_string('verify_email.html', {'user': user,
+                                                         'domain': current_site.domain,
+                                                         'uid': uid,
+                                                         'token': token, })
         send_mail(
             email_subject,
+            message,
             
+        )
+
         return user
 
 
