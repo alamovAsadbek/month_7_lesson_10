@@ -1,3 +1,5 @@
+import threading
+
 from django.contrib.auth.models import User
 from rest_framework import generics
 from rest_framework.response import Response
@@ -30,4 +32,16 @@ class LogoutView(generics.GenericAPIView):
             token.blacklist()
             return Response(status=205)
         except Exception as e:
+            print(e)
+            return Response(status=400)
+
+
+class VerifyEmailView(generics.GenericAPIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            email = request.query_params["email"]
+            send_verification_email = request.query_params["send_verification_email"]
+            threading.Thread(target=send_verification_email, args=(email,)).start()
+        except Exception as e:
+            print(e)
             return Response(status=400)
